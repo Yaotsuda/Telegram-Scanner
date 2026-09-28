@@ -1,0 +1,28 @@
+В database.js добавьте перед module.exports:
+
+function getPendingTasks() {
+  return state.scan_tasks
+    .filter(task => ["pending", "waiting", "running"].includes(task.status))
+    .map(task => {
+      let payload = {}
+
+      try {
+        payload = JSON.parse(task.payload || "{}")
+      } catch {
+        payload = {}
+      }
+
+      if (task.status === "running") {
+        task.status = "pending"
+        task.stage = "Восстановлено после перезапуска"
+      }
+
+      return {
+        id: task.id,
+        type: task.task_type,
+        payload
+      }
+    })
+}
+
+И добавьте getPendingTasks в module.exports.
